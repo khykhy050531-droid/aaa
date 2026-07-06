@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS EC2 & HTTPD Demo Dashboard</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Premium responsive real-time monitoring dashboard for AWS EC2 instances and Apache HTTPD servers.">
+    <meta name="author" content="Antigravity">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="dashboard-sidebar">
+            <div class="sidebar-brand">
+                <i data-lucide="server" class="brand-icon"></i>
+                <span class="brand-name">AWS EC2 Monitor</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" id="nav-overview">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>대시보드 개요</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-metrics">
+                    <i data-lucide="activity"></i>
+                    <span>인스턴스 메트릭</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-httpd">
+                    <i data-lucide="globe"></i>
+                    <span>HTTPD 웹서버</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-logs">
+                    <i data-lucide="terminal"></i>
+                    <span>실시간 로그</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">EC2</div>
+                    <div class="user-info">
+                        <span class="user-name">i-0a12b34c56def</span>
+                        <span class="user-role">t3.medium</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Area -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="main-header" id="dashboard-header">
+                <div class="header-title-area">
+                    <h1 class="page-title" id="main-title">EC2 HTTPD 모니터링</h1>
+                    <p class="page-subtitle">AWS EC2 인스턴스 및 Apache HTTPD 웹서버의 실시간 상태</p>
+                </div>
+                <div class="header-actions">
+                    <div class="status-badge running" id="instance-status-badge">
+                        <span class="status-indicator"></span>
+                        <span id="instance-status-text">EC2 Running</span>
+                    </div>
+                    <div class="info-tag" id="ip-info-tag">
+                        <i data-lucide="link-2"></i>
+                        <span>13.125.24.180</span>
+                    </div>
+                    <button class="icon-btn" id="btn-refresh" title="새로고침">
+                        <i data-lucide="rotate-cw"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <main class="dashboard-grid">
+                <!-- Row 1: KPI Cards -->
+                <section class="kpi-grid">
+                    <!-- CPU Card -->
+                    <div class="kpi-card" id="card-cpu">
+                        <div class="kpi-card-header">
+                            <span class="kpi-title">CPU 사용량</span>
+                            <div class="kpi-icon-wrapper cpu">
+                                <i data-lucide="cpu"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card-body">
+                            <span class="kpi-value" id="cpu-value">24.5%</span>
+                            <span class="kpi-trend positive" id="cpu-trend">
+                                <i data-lucide="trending-up"></i> +1.2% (1m)
+                            </span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="cpu-progress" style="width: 24.5%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Memory Card -->
+                    <div class="kpi-card" id="card-memory">
+                        <div class="kpi-card-header">
+                            <span class="kpi-title">메모리 사용량</span>
+                            <div class="kpi-icon-wrapper memory">
+                                <i data-lucide="database"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card-body">
+                            <span class="kpi-value" id="memory-value">1.8 / 4.0 GB</span>
+                            <span class="kpi-trend neutral" id="memory-trend">
+                                45% 사용 중
+                            </span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="memory-progress" style="width: 45%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Network IO Card -->
+                    <div class="kpi-card" id="card-network">
+                        <div class="kpi-card-header">
+                            <span class="kpi-title">네트워크 I/O (In/Out)</span>
+                            <div class="kpi-icon-wrapper network">
+                                <i data-lucide="arrow-left-right"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card-body">
+                            <span class="kpi-value" id="network-value">142 KB/s</span>
+                            <span class="kpi-trend positive" id="network-trend">
+                                <i data-lucide="arrow-down"></i> 98 KB/s | <i data-lucide="arrow-up"></i> 44 KB/s
+                            </span>
+                        </div>
+                        <div class="progress-bar-container mini">
+                            <div class="progress-bar network-in" id="net-in-progress" style="width: 60%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Apache HTTPD Status Card -->
+                    <div class="kpi-card" id="card-httpd-status">
+                        <div class="kpi-card-header">
+                            <span class="kpi-title">HTTPD 웹서버 상태</span>
+                            <div class="kpi-icon-wrapper httpd">
+                                <i data-lucide="globe"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-card-body">
+                            <span class="kpi-value" id="httpd-status-value">Active (running)</span>
+                            <span class="kpi-trend positive" id="httpd-uptime-value">
+                                Uptime: 4d 12h 30m
+                            </span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar success" id="httpd-progress" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 2: Charts and Control Panel -->
+                <section class="dashboard-charts-panel">
+                    <!-- Chart Card: System Metrics -->
+                    <div class="chart-card" id="system-metrics-chart-card">
+                        <div class="card-header">
+                            <h2 class="card-title">EC2 성능 모니터링 (실시간)</h2>
+                            <div class="card-header-actions">
+                                <span class="chart-legend-dot cpu"></span> CPU
+                                <span class="chart-legend-dot memory"></span> Memory
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="systemMetricsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart Card: Apache Traffic -->
+                    <div class="chart-card" id="apache-traffic-chart-card">
+                        <div class="card-header">
+                            <h2 class="card-title">HTTP 응답 상태 코드 비율</h2>
+                        </div>
+                        <div class="chart-wrapper pie-chart-wrapper">
+                            <canvas id="httpStatusChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 3: Apache Control Panel & Real-time Logs -->
+                <section class="dashboard-controls-logs">
+                    <!-- Control Panel Card -->
+                    <div class="control-card" id="apache-control-card">
+                        <h2 class="card-title">Apache 서비스 관리자</h2>
+                        <p class="card-desc">웹 서버의 실행 상태를 직접 제어하고 구성을 다시 로드합니다.</p>
+                        
+                        <div class="control-status">
+                            <div class="status-item">
+                                <span class="status-label">현재 상태:</span>
+                                <span class="status-badge-inline running" id="control-httpd-badge">Active</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">PID:</span>
+                                <span class="status-code" id="control-httpd-pid">3142</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="btn-httpd-restart">
+                                <i data-lucide="rotate-cw"></i> 서비스 재시작
+                            </button>
+                            <button class="btn btn-secondary" id="btn-httpd-stop">
+                                <i data-lucide="square"></i> 서비스 정지
+                            </button>
+                            <button class="btn btn-tertiary" id="btn-httpd-reload">
+                                <i data-lucide="refresh-cw"></i> 구성 재로드 (Reload)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Log Viewer -->
+                    <div class="log-card" id="apache-log-card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i data-lucide="terminal"></i> /var/log/httpd/access_log (시뮬레이션)</h2>
+                            <div class="log-actions">
+                                <button class="log-action-btn" id="btn-log-clear" title="로그 지우기">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                                <button class="log-action-btn" id="btn-log-pause" title="일시정지">
+                                    <i data-lucide="pause" id="btn-log-pause-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="log-terminal" id="log-terminal-output">
+                            <div class="log-line system">[SYSTEM] Logging started. Monitoring apache access log...</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Script file -->
+    <script src="app.js"></script>
+    <script>
+        // Initialize lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
